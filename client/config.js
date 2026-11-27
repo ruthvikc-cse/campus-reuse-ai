@@ -13,7 +13,7 @@ const CATEGORIES = [
 ];
 
 // Replace this placeholder with your Render / Railway / Vercel backend URL when deploying online
-const PRODUCTION_API_URL = "https://your-campus-reuse-backend.onrender.com";
+const PRODUCTION_API_URL = "https://campus-reuse-ai.onrender.com";
 
 // Auto-switch between localhost backend and deployed production backend
 const API_BASE_URL = (() => {
