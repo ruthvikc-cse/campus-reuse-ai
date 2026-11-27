@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Campus ReUse | Pro Marketplace</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="showHome()">Campus<span>ReUse</span><small>PRO MARKETPLACE</small></div>
+  <div class="header-actions">
+    <button id="authButton" class="primary" onclick="openAuth()">Log in</button>
+    <div id="authActions" style="display:none;align-items:center;gap:10px">
+      <div style="position:relative">
+        <div class="bell-wrapper" onclick="toggleNotifs(event)">🔔<div class="bell-badge" id="bellBadge"></div></div>
+        <div id="notifDropdown" class="notif-dropdown">
+          <div class="dropdown-header" style="justify-content:space-between">
+            <b>Notifications</b>
+            <button style="background:none;color:var(--g);font-size:12px;padding:0" onclick="markAllRead()">Mark read</button>
+          </div>
+          <div id="notifList" style="max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+      <div style="position:relative">
+        <div id="profileAvatar" class="avatar" onclick="toggleProfile(event)"></div>
+        <div id="profileDropdown" class="profile-dropdown">
+          <div class="dropdown-header">
+            <div class="avatar" id="dropdownAvatar"></div>
+            <div><b id="dropdownName">User</b><div class="muted" id="dropdownPhone"></div></div>
+          </div>
+          <button class="dropdown-item" onclick="showOrders()">📦 My Orders &amp; Activity</button>
+          <button class="dropdown-item" onclick="showSettings()">⚙️ Settings</button>
+        </div>
+      </div>
+    </div>
+    <button class="primary" onclick="openForm()">＋ Sell</button>
+  </div>
+</header>
+
+<main>
+  <section id="homePage" class="page active">
+    <div class="hero">
+      <div>
+        <div class="eyebrow">♻ Buy Smarter. Waste Less.</div>
+        <h1>Good stuff deserves a second life.</h1>
+        <p>A campus marketplace to buy and sell pre-loved books, gadgets, calculators and more, all within your student community.</p>
+        <button class="primary" onclick="document.getElementById('market').scrollIntoView({behavior:'smooth'})">Explore items ↓</button>
+      </div>
+      <div class="art">
+        <div class="orb">♻️</div>
+        <div class="float f1">✨ Reuse more</div>
+        <div class="float f2">📚 Student-friendly prices</div>
+      </div>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-box"><b id="count">0</b><span>Items listed right now</span></div>
+      <div class="stat-box"><b>₹0</b><span>Listing fee for students</span></div>
+      <div class="stat-box sdg-box" onclick="document.getElementById('sdgModal').style.display='flex'"><b>SDGs ℹ️</b><span>Responsible consumption &amp; more</span></div>
+    </div>
+
+    <section id="market">
+      <div class="head"><div class="eyebrow">The Marketplace</div><h2>Find your next favourite.</h2></div>
+      <div class="category-panel" id="catPanel"></div>
+      <div class="tools">
+        <div class="search-row">
+          <input id="search" class="field" placeholder="Search for books, phones, or ask AI (e.g., calculator under ₹800)..." oninput="onSearchInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();runAiSearch();}">
+          <button type="button" id="aiSearchBtn" class="primary" onclick="runAiSearch()" style="white-space:nowrap">✨ AI Search</button>
+        </div>
+        <div id="aiSearchBanner" class="ai-banner">
+          <span id="aiSearchSummary"></span>
+          <button type="button" class="soft" style="padding:5px 12px;font-size:12px;background:#fff" onclick="clearAiSearch()">Clear AI filter</button>
+        </div>
+      </div>
+      <div class="grid" id="itemsGrid"></div>
+    </section>
+  </section>
+
+  <section id="detailPage" class="page">
+    <div class="page-top"><button class="soft" onclick="history.back()">← Back</button></div>
+    <div id="detailContent"></div>
+    <div id="aiRecsSection" class="ai-recs-wrap" style="display:none">
+      <div class="head"><div class="eyebrow">✨ Smart Discovery</div><h2>AI Recommended for You</h2></div>
+      <div class="grid" id="aiRecsGrid"></div>
+    </div>
+  </section>
+
+  <section id="ordersPage" class="page">
+    <div class="page-top"><button class="soft" onclick="history.back()">← Back</button></div>
+    <div class="head"><h2>My Dashboard</h2></div>
+    <div class="order-tabs">
+      <button class="order-tab active" id="tabBuying" onclick="switchTab('buying')">My Buying Requests</button>
+      <button class="order-tab" id="tabSelling" onclick="switchTab('selling')">My Selling Listings</button>
+    </div>
+    <div id="buyingView"></div>
+    <div id="sellingView" style="display:none"></div>
+  </section>
+
+  <section id="settingsPage" class="page">
+    <div class="page-top"><button class="soft" onclick="history.back()">← Back</button></div>
+    <div class="head"><h2>Account Settings</h2></div>
+    <div style="max-width:400px;background:#fff;padding:20px;border-radius:16px;border:1px solid var(--line)">
+      <button class="soft" style="width:100%;margin-bottom:15px;text-align:left" onclick="logout()">🚪 Log out</button>
+      <button style="width:100%;text-align:left;background:#fff0ef;color:#9c3029" onclick="alert('Account deletion needs a backend function. Add one later.')">🗑️ Delete Account</button>
+    </div>
+  </section>
+</main>
+
+<!-- SELL MODAL WITH AI PRICE BRIEF, DESCRIPTION GENERATOR & REWRITE -->
+<div class="backdrop" id="backdrop" onclick="if(event.target===this)closeForm()">
+  <div class="modal">
+    <h2 style="margin-top:0">Post an Item</h2>
+
+    <div class="ai-sell-intro">
+      <p><b>✨ Campus ReUse AI Seller Assistant:</b> What are you planning to sell? Get a quick resale price brief or auto-write your listing before publishing.</p>
+      <div class="ai-toolbar">
+        <button type="button" id="btnTogglePriceAi" class="ai-btn" onclick="toggleSellAi('price')">💰 AI Price Brief</button>
+        <button type="button" id="btnToggleDescAi" class="ai-btn" onclick="toggleSellAi('desc')">✨ Generate with AI</button>
+      </div>
+    </div>
+
+    <!-- AI Resale Price Brief & Estimator Panel -->
+    <div id="aiPriceBox" class="ai-inline-panel">
+      <div class="ai-inline-head">
+        <b>💰 AI Resale Price Brief &amp; Estimator</b>
+        <button type="button" class="soft" style="padding:4px 10px;font-size:11px" onclick="closeSellAi()">Close</button>
+      </div>
+      <div class="formgrid">
+        <div><label>What are you selling? / Brand &amp; Model</label><input id="estBrand" class="field ai-compact" placeholder="e.g., Casio fx-991ES PLUS"></div>
+        <div><label>Original Price ₹ (if known)</label><input id="estOrigPrice" class="field ai-compact" type="number" min="1" inputmode="numeric" placeholder="e.g., 1200"></div>
+        <div><label>Age of Item (if known)</label><input id="estAge" class="field ai-compact" placeholder="e.g., 1 year / 2 semesters"></div>
+        <div><label>Damage / Missing Accessories</label><input id="estDamage" class="field ai-compact" placeholder="e.g., None / missing slide cover"></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button type="button" id="aiEstRunBtn" class="primary" style="padding:8px 14px;font-size:13px" onclick="runPriceEstimator()">Get Price Brief</button>
+        <span class="muted">Also reads Item Name &amp; Condition below.</span>
+      </div>
+      <div id="aiEstResult" class="ai-result-box"></div>
+    </div>
+
+    <!-- AI Product Description Generator Panel -->
+    <div id="aiDescBox" class="ai-inline-panel">
+      <div class="ai-inline-head">
+        <b>✨ AI Product Description Generator</b>
+        <button type="button" class="soft" style="padding:4px 10px;font-size:11px" onclick="closeSellAi()">Close</button>
+      </div>
+      <div class="formgrid">
+        <div><label>Brand / Model (optional)</label><input id="aiBrand" class="field ai-compact" placeholder="e.g., Casio fx-991EX"></div>
+        <div><label>Original Price ₹ (optional)</label><input id="aiOrigPrice" class="field ai-compact" type="number" min="1" inputmode="numeric" placeholder="e.g., 1200"></div>
+        <div class="full"><label>Short info about your item</label><textarea id="aiNotes" class="field ai-compact" rows="2" placeholder="e.g., Used for engineering maths, buttons work cleanly, no scratches"></textarea></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button type="button" id="aiDescRunBtn" class="primary" style="padding:8px 14px;font-size:13px" onclick="runDescGenerator()">Generate Listing</button>
+        <span class="muted">Uses Item Name, Price &amp; Condition below too.</span>
+      </div>
+      <div id="aiDescResult" class="ai-result-box"></div>
+    </div>
+
+    <form id="form" onsubmit="addItem(event)">
+      <div class="formgrid">
+        <div class="full"><label>Item Name</label><input id="name" class="field" required maxlength="80" placeholder="e.g., Casio fx-991EX"></div>
+        <div><label>Price (₹)</label><input id="price" class="field" type="number" min="1" inputmode="numeric" required></div>
+        <div><label>Category</label><select id="category" class="field"><option>Books</option><option>Study Tools</option><option>Electronics</option><option>Mobiles</option><option>Accessories</option></select></div>
+        <div><label>Condition</label><select id="condition" class="field"><option>Like new</option><option>Good</option><option>Fair</option></select></div>
+        <div><label>Pickup location</label><input id="location" class="field" required placeholder="e.g., BMS College of Engineering"></div>
+        <div class="full"><label>Item Photo</label><input id="itemPhoto" class="field" type="file" accept="image/*"></div>
+        <div class="full">
+          <div class="label-row">
+            <label for="detail">Description</label>
+            <button type="button" id="aiRewriteBtn" class="ai-rewrite-btn" onclick="runDescriptionRewrite()">✨ AI Rewrite</button>
+          </div>
+          <textarea id="detail" class="field" required rows="3" placeholder="Write a quick note about your item, or click '✨ AI Rewrite' to polish it..."></textarea>
+          <div id="aiRewriteResult" class="ai-result-box"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="soft" onclick="closeForm()">Cancel</button>
+        <button class="primary" id="publishBtn">Publish Listing</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- OFFER MODAL -->
+<div class="backdrop" id="offerModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal" style="width:400px">
+    <h2 style="margin-top:0">Make an Offer</h2>
+    <p class="muted">Propose a price and send a message to the seller.</p>
+    <form onsubmit="submitOffer(event)">
+      <input type="hidden" id="offerProdId"><input type="hidden" id="offerSellerId">
+      <label>Your Price (₹)</label><input id="offerPrice" class="field" type="number" min="1" inputmode="numeric" required style="margin-bottom:14px">
+      <label>Message to Seller</label><textarea id="offerMessage" class="field" required rows="3" placeholder="e.g., I can pick it up today at the library."></textarea>
+      <div class="actions">
+        <button type="button" class="soft" onclick="document.getElementById('offerModal').style.display='none'">Cancel</button>
+        <button class="primary" type="submit" id="offerSubmitBtn">Send Offer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- SDG MODAL -->
+<div class="backdrop" id="sdgModal" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <h2 style="margin-top:0">SDGs Supported</h2>
+    <p class="muted">Campus ReUse aligns with the UN Sustainable Development Goals.</p>
+    <div class="sdg-item"><div class="sdg-icon" style="background:#bf8b2e">12</div><div><h4>Responsible Consumption</h4><p>Encourages buying and selling pre-owned products, reducing waste.</p></div></div>
+    <div class="sdg-item"><div class="sdg-icon" style="background:#3f7e44">13</div><div><h4>Climate Action</h4><p>Reusing products reduces demand for newly manufactured goods.</p></div></div>
+    <div class="sdg-item"><div class="sdg-icon" style="background:#c5192d">4</div><div><h4>Quality Education</h4><p>Makes textbooks and calculators more affordable.</p></div></div>
+    <div class="sdg-item"><div class="sdg-icon" style="background:#dd1367">10</div><div><h4>Reduced Inequalities</h4><p>Affordable access to essential student resources.</p></div></div>
+    <div class="sdg-item"><div class="sdg-icon" style="background:#fd9d24">11</div><div><h4>Sustainable Communities</h4><p>Builds a campus-level sharing ecosystem.</p></div></div>
+    <div class="actions"><button class="soft" onclick="document.getElementById('sdgModal').style.display='none'">Close</button></div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="backdrop" id="authBackdrop" onclick="if(event.target===this)closeAuth()" style="z-index:60">
+  <div class="modal" style="width:400px">
+    <h2 id="authHeading" style="margin-top:0">Log in</h2>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <button id="loginTab" class="soft" style="flex:1" onclick="setAuthMode('login')">Login</button>
+      <button id="registerTab" class="soft" style="flex:1" onclick="setAuthMode('register')">Register</button>
+    </div>
+    <form id="loginForm" onsubmit="loginUser(event)">
+      <label>Email</label><input id="loginIdentifier" class="field" type="email" autocomplete="email" required style="margin-bottom:14px">
+      <label>Password</label><input id="loginPassword" class="field" type="password" autocomplete="current-password" required>
+      <button class="primary" id="loginSubmit" type="submit" style="width:100%;margin-top:20px">Login</button>
+    </form>
+    <form id="registerForm" style="display:none" onsubmit="registerUser(event)">
+      <label>Full Name</label><input id="registerName" class="field" required style="margin-bottom:12px">
+      <label>Phone Number</label><input id="registerPhone" class="field" required inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10 digits" style="margin-bottom:12px">
+      <label>Email</label><input id="registerEmail" class="field" type="email" autocomplete="email" required style="margin-bottom:12px">
+      <label>Password (min 6 characters)</label><input id="registerPassword" class="field" type="password" minlength="6" autocomplete="new-password" required>
+      <button class="primary" id="registerSubmit" type="submit" style="width:100%;margin-top:20px">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- BOTTOM-LEFT ROUND AI ASSISTANT BUTTON & CHAT PANEL -->
+<button type="button" class="ai-fab" id="aiFab" onclick="toggleAiChat()" aria-label="Open Campus ReUse AI" title="Campus ReUse AI">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"></path>
+    <path d="M19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9L19 16z"></path>
+  </svg>
+  <span class="ai-fab-badge">AI</span>
+</button>
+
+<div class="ai-chat-panel" id="aiChatPanel" role="dialog" aria-label="Campus ReUse AI Assistant">
+  <div class="ai-chat-head">
+    <div><b>✨ Campus ReUse AI</b><small>Smart Marketplace Assistant</small></div>
+    <button type="button" class="ai-close" onclick="toggleAiChat()" aria-label="Close">✕</button>
+  </div>
+  <div class="ai-quick">
+    <button type="button" class="ai-chip" onclick="quickAiAction('desc')">Generate Product Description</button>
+    <button type="button" class="ai-chip" onclick="quickAiAction('price')">Estimate Resale Price</button>
+    <button type="button" class="ai-chip" onclick="quickAiAction('find')">Find Products</button>
+    <button type="button" class="ai-chip" onclick="quickAiAction('ask')">Ask a Marketplace Question</button>
+  </div>
+  <div class="ai-msgs" id="aiMsgs"></div>
+  <form class="ai-chat-form" onsubmit="sendAiChat(event)">
+    <input id="aiChatInput" type="text" placeholder="Ask about items, prices, or Campus ReUse..." autocomplete="off">
+    <button type="submit" class="primary" id="aiSendBtn" style="padding:9px 15px;font-size:13px">Send</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+<script src="./ai.js"></script>
+</body>
+</html>
