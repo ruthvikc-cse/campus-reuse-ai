@@ -1,6 +1,8 @@
 # Campus ReUse — AI-Powered Student Marketplace
 
 A full-stack peer-to-peer campus marketplace where college students can buy and sell pre-owned textbooks, engineering calculators, electronics, mobile phones, and accessories—upgraded with **Campus ReUse AI**.
+## Live Demo
+**Live App:** [https://campus-reuse-ai.onrender.com]
 
 ## Folder Structure
 
